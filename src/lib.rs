@@ -1,72 +1,82 @@
 // a program that reads a file and replaces the content of this file with the (initial) size of the file
-use std::fs as fs;
-use std::fs::File as File;
+use std::fs;
+use std::fs::File;
+use std::fs::Metadata;
 use std::io::prelude::*;
 
+/*
+        let hachator = Hachator::new();
+*/
+
+fn main() {
+    actionne("real_file.txt", fs::metadata);
+    let mut file = File::create("foo.txt").unwrap();
+    file.write_all(b"Hello, world!").unwrap();
+}
+
+// fn toto(a : &'a Titi) -> &'a Tata {}
 
 /*
-fn main() -> std::io::Result<()> {
-    let mut file = File::create("foo.txt")?;
-    file.write_all(b"Hello, world!")?;
-    Ok(())
-} */
 
-pub struct Hachator {
-    //systeme_de_fichier : std::fs:file::create;
-    //ecriture: File
+Fn: It cannot modify the objects it captures.
+FnMut: It can modify the objects it captures.
+FnOnce: The most restricted. Can only be called once because when it is called it consumes itself and its captures.
+
+ metadata<P: AsRef<Path>>(path: P) -> io::Result<Metadata>))
+*/
+
+// lit le fichier dans ton input stream, calcule sa taille, écrit la taille (en chaîne) dans ton outputstream
+pub fn actionne<'a, L: Lenny>(
+    nom_fichier: &'a str,
+    metadata: fn(&'a str) -> std::io::Result<L>,
+) {
+    // en mode production
+    //let metadata_fichier = metadata_getter(nom_fichier).unwrap();
+    let metadata_fichier = metadata(nom_fichier).unwrap();
+    // acquiert la taille du fichier dans le file system
+    let taille = metadata_fichier.len();
+
+    // connecte output_stream sur le fichier dans le file system
+    // écrit la taille dans l'output_streamhttps://stackoverflow.com/questions/31289588/converting-a-str-to-a-u8
+    let mut fichier = File::create(nom_fichier).unwrap();
+    fichier.write(taille.to_string().as_bytes()).unwrap();
+
+    //fn write(&mut self, buf: &[u8]) -> Result<usize>
 }
 
-impl Hachator {
-    fn new() -> Hachator{
-        Hachator{}
-    }
-/*
+struct StubMetadata {}
 
-    Fn: It cannot modify the objects it captures.
-    FnMut: It can modify the objects it captures.
-    FnOnce: The most restricted. Can only be called once because when it is called it consumes itself and its captures.
- 
-     metadata<P: AsRef<Path>>(path: P) -> io::Result<Metadata>)) 
- 
-    */
-
-    // lit le fichier dans ton input stream, calcule sa taille, écrit la taille (en chaîne) dans ton outputstream
-    pub fn actionne(&self, nom_fichier: &str, metadata_getter: fn(usize) -> usize) {
-
-        // en mode production
-        //let metadata_fichier = metadata_getter(nom_fichier).unwrap();
-        let metadata_fichier = fs::metadata(nom_fichier).unwrap();
-        // acquiert la taille du fichier dans le file system
-        let taille = metadata_fichier.len();
-        
-        // connecte output_stream sur le fichier dans le file system
-        // écrit la taille dans l'output_streamhttps://stackoverflow.com/questions/31289588/converting-a-str-to-a-u8
-        let mut fichier = File::create(nom_fichier).unwrap();
-        fichier.write(taille.to_string().as_bytes()).unwrap();
-
-    }
+pub trait Lenny {
+    fn len(&self) -> u64; 
 }
 
-fn plus_un(n: usize) -> usize {
-    n+1
+impl Lenny for StubMetadata {
+    fn len(&self) -> u64 { 42 }
 }
+
+impl Lenny for fs::Metadata {
+    fn len(&self) -> u64 { self.len() }
+}
+
+fn stub_file_size (n: &str) -> std::io::Result<StubMetadata> {
+    Ok(StubMetadata{})
+}
+
+
 
 
 #[cfg(test)]
 mod tests {
 
-    use std::fs as fs;
     use super::*;
+    use std::fs;
     use std::io::prelude::*;
- 
+
     #[test]
-    fn remplace_un_fichier_contenant_un_octet_par_un_fichier_contenant_1 () {
-        // agencement
-        let hachator = Hachator::new();
+    fn remplace_un_fichier_contenant_un_octet_par_un_fichier_contenant_1() {
         // action
-        hachator.actionne("UnFichier.txt", plus_un);
-        // assertion : le code sous test a appelé une fonction qui a écrit "1" dans le stream 
+        actionne("UnFichier.txt", stub_file_size);
+        // assertion : le code sous test a appelé une fonction qui a écrit "1" dans le stream
         assert_eq!("", "");
     }
-
 }
